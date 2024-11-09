@@ -4,6 +4,7 @@ import pytubefix as pytube
 from urllib.parse import quote_plus
 import io
 import re
+from pytubefix.exceptions import BotDetection  
 
 app = Flask(__name__)
 CORS(app)
@@ -30,7 +31,6 @@ def download_audio_route():
         filename = re.sub(r'[^\w\s-]', '', yt.title).strip()
         filename = filename.replace(" ", "_") + ".mp4"
 
-
         filename = quote_plus(filename)
 
         response = Response(
@@ -39,14 +39,14 @@ def download_audio_route():
             headers={
                 "Content-Disposition": f"attachment; filename={filename}",
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Expose-Headers": "Content-Disposition"  
+                "Access-Control-Expose-Headers": "Content-Disposition"
             }
         )
 
         return response
 
-    except pytube.exceptions.PytubeError as e:
-        return jsonify({"error": f"Erro ao acessar o conteúdo: {str(e)}"}), 400
+    except BotDetection as e:
+        return jsonify({"error": f"Erro de detecção de bot: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"error": f"Erro ao baixar o conteúdo: {str(e)}"}), 500
 
